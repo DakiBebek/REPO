@@ -33,6 +33,7 @@
     "@supabase/ssr@0.12.7": true,
     "recharts@3.10.1": true,
     "date-fns@4.4.0": true,
-    "lucide-react@1.44.0": true
+    "lucide-react@1.44.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }
