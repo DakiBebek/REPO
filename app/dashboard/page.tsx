@@ -5,13 +5,16 @@ import TransactionList from '@/components/TransactionList'
 import StatsChart from '@/components/StatsChart'
 
 export default async function Dashboard() {
+  // 1. Cek apakah user sudah login
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
+  // 2. Jika TIDAK login, baru redirect ke login
   if (!user) {
     redirect('/login')
   }
 
+  // 3. Jika SUDAH login, ambil data transaksi
   const { data: transactions, error } = await supabase
     .from('transactions')
     .select('*, categories(name, color, icon)')
@@ -22,9 +25,9 @@ export default async function Dashboard() {
     console.error('Error fetching transactions:', error)
   }
 
-  // Pastikan transactions adalah array, bahkan jika null
   const safeTransactions = transactions || []
 
+  // 4. Hitung total
   const totalIncome = safeTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + Number(t.amount), 0)
@@ -33,36 +36,38 @@ export default async function Dashboard() {
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + Number(t.amount), 0)
 
+  // 5. Tampilkan Halaman Dashboard (JANGAN redirect di sini!)
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">💰 Dashboard Keuangan</h1>
+          <h1 className="text-3xl font-bold text-gray-800">💰 Dashboard Keuangan</h1>
           <form action="/api/auth/logout" method="post">
-            <button className="bg-red-500 text-white px-4 py-2 rounded-lg">Logout</button>
+            <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+              Logout
+            </button>
           </form>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow">
-            <p className="text-gray-500">Total Pemasukan</p>
+          <div className="bg-white p-6 rounded-xl shadow border-l-4 border-green-500">
+            <p className="text-gray-500 text-sm">Total Pemasukan</p>
             <p className="text-2xl font-bold text-green-600">Rp {totalIncome.toLocaleString('id-ID')}</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow">
-            <p className="text-gray-500">Total Pengeluaran</p>
+          <div className="bg-white p-6 rounded-xl shadow border-l-4 border-red-500">
+            <p className="text-gray-500 text-sm">Total Pengeluaran</p>
             <p className="text-2xl font-bold text-red-600">Rp {totalExpense.toLocaleString('id-ID')}</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow">
-            <p className="text-gray-500">Saldo</p>
+          <div className="bg-white p-6 rounded-xl shadow border-l-4 border-indigo-500">
+            <p className="text-gray-500 text-sm">Sisa Saldo</p>
             <p className="text-2xl font-bold text-indigo-600">Rp {(totalIncome - totalExpense).toLocaleString('id-ID')}</p>
           </div>
         </div>
 
-        {/* Chart - Pastikan kirim array kosong jika null */}
+        {/* Chart & Lists */}
         <StatsChart transactions={safeTransactions} />
 
-        {/* Form & List */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <TransactionForm />
           <TransactionList transactions={safeTransactions} />
