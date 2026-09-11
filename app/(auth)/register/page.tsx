@@ -13,9 +13,19 @@ export default function Register() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) setMsg(error.message)
-    else { setMsg('✅ Cek email untuk verifikasi!'); setTimeout(() => router.push('/login'), 2000) }
+    setError('')
+    
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    
+    if (error) {
+      setError(error.message)
+    } else {
+      // 1. Refresh server components agar membaca cookie sesi yang baru
+      router.refresh()
+      
+      // 2. Baru arahkan ke dashboard
+      router.push('/dashboard')
+    }
   }
 
   return (
