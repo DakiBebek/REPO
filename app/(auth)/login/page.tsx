@@ -24,7 +24,7 @@ export default function Login() {
       router.refresh()
       
       // 2. Baru arahkan ke dashboard
-      router.push('/dashboard')
+      router.push('/')
     }
   }
   }
