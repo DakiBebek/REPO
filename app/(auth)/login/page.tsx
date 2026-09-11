@@ -11,11 +11,22 @@ export default function Login() {
   const router = useRouter()
   const supabase = createClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
+    
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) setError(error.message)
-    else router.push('/dashboard')
+    
+    if (error) {
+      setError(error.message)
+    } else {
+      // 1. Refresh server components agar membaca cookie sesi yang baru
+      router.refresh()
+      
+      // 2. Baru arahkan ke dashboard
+      router.push('/dashboard')
+    }
+  }
   }
 
   return (
